@@ -1,0 +1,52 @@
+version: '3.7'
+
+services:
+  samba:
+    image: dperson/samba
+    # yes: the share is writable
+    # no: no guest access
+    # no: not read-only share
+    # patrik.burkhalter: only the user 'patrik.burkhalter' has access to this share
+    command: ["-u", "patrik.burkhalter;passwort", "-s", "dateiablage;/mount/dateiablage;yes;no;no;patrik.burkhalter;"]
+    volumes:
+      - samba_volume:/mount/dateiablage
+    ports:
+      - "1390:139"
+      - "4450:445"
+    environment:
+      - TZ=Europe/Zurich
+    networks:
+      - internal_network
+      - default
+
+  tomcat:
+    image: tomcat:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - tomcat_volume:/usr/local/tomcat/webapps
+      - ./tomcat/index.html:/usr/local/tomcat/webapps/ROOT/index.html
+
+    networks:
+      - internal_network
+      - default
+
+  ntp:
+    image: cturra/ntp
+    networks:
+      - internal_network
+    environment:
+      - NTP_SERVERS=pool.ntp.org
+      - TZ=Europe/Zurich
+
+networks:
+  internal_network:
+    driver: bridge
+  default:
+    driver: bridge
+
+volumes:
+  samba_volume:
+    driver: local
+  tomcat_volume:
+    driver: local

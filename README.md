@@ -2,11 +2,13 @@
 
 ### Einleitung
 
-Diese Dokumentation beschreibt die Einrichtung und Verwendung von Docker (Compose) auf einem Raspberry Pi für die Bereitstellung eines Samba-Dateiservers, eines Tomcat-Web-Servers sowie eines NTP Zeitservers. 
+Diese Dokumentation beschreibt die Einrichtung und Verwendung von Docker (Compose) auf einem Raspberry Pi für die Bereitstellung eines Samba-Dateiservers, eines Tomcat-Web-Servers sowie eines Jupyter Notebooks. 
 
-### Installation von Docker auf dem Raspberry Pi
+## Installation von Docker auf dem Raspberry Pi
 
-Vor der Verwendung von Docker muss sichergestellt werden, dass das Betriebssystem des Raspberry Pis auf dem neuesten Stand ist:
+### Installation und Updates
+
+Vor der Verwendung von Docker muss sichergestellt werden, dass das Betriebssystem des Raspberry Pis auf dem neuesten Stand ist. Wir verwenden die Linux-Distribution Debian (V12.0 - "Bookworm"):
 
 ```
 sudo apt update
@@ -59,28 +61,73 @@ Dieser Befehl startet alle Dienste im Hintergrund. Um sie zu stoppen und alle zu
 docker-compose down
 ```
 
-### Dokumentation der docker-compose.yml
+## Docker Compose Konfiguration
 
-Die `docker-compose.yml` definiert Dienste, Netzwerke und Volumes.
+Die `docker-compose.yml`-Datei definiert drei Hauptdienste: `samba`, `tomcat` und `jupyter`.
 
-- services: Definiert die drei Hauptdienste (samba, tomcat, ntp).
-- samba:
-Nutzt das dperson/samba-Image für die Bereitstellung des Samba-Dienstes.
-Konfiguriert einen Benutzer und eine Freigabe.
-Volumes sorgen für die Datenpersistenz.
-Ports werden auf nicht standardmässige Ports gemappt, um Kollisionen zu vermeiden.
-- tomcat:
-Verwendet das neueste Tomcat-Image von Docker Hub.
-Der Port 8080 ist für den Zugriff auf Tomcat vom Host aus freigegeben.
-Ein Volume speichert die Webanwendungen persistent.
-Eine lokale index.html-Datei wird in den webapps/ROOT-Ordner gemappt, um eine Homepage bereitzustellen.
-- jupyter:
-Verwendet das Scipy-Notebook-Image (Scientific Python).
-Der Port 8888 ist für den Zugriff auf die Weboberfläche von Jupyter Notebook vom Host aus freigegeben.
-Ein Volume speichert die Scipy Notebooks persistent.
+### Dienste
 
-- networks: Konfiguriert ein internes Netzwerk für die Kommunikation zwischen den Diensten und ein Standardnetzwerk für den Zugriff von aussen.
-- volumes: Definiert die Volumes für Samba und Tomcat zur Datenspeicherung.
-Zusammenfassung
+- **Samba**:
+    - Verwendet das `dperson/samba`-Image zur Bereitstellung eines Samba-Dienstes.
+    - Konfiguriert einen Benutzer (`patrik.burkhalter`) und eine Freigabe (`dateiablage`).
+    - Volumes ermöglichen die Datenpersistenz.
+    - Ports `1390` und `4450` sind für den Zugriff auf Samba vom Host aus freigegeben, um Standardportkollisionen zu vermeiden.
 
-Mit dieser Konfiguration kann eine praktische Umgebung eingerichtet werden, um Dienste wie Samba und Tomcat zu verstehen und zu verwalten.
+- **Tomcat**:
+    - Nutzt das neueste offizielle Tomcat-Image von Docker Hub.
+    - Port `8080` ist für den Webzugriff vom Host aus freigegeben.
+    - Ein Volume speichert die Webanwendungen von Tomcat persistent.
+    - Eine lokale `index.html`-Datei wird in den `webapps/ROOT`-Ordner des Tomcat-Servers gemappt, um eine Homepage bereitzustellen.
+
+- **Jupyter**:
+    - Setzt das `quay.io/jupyter/scipy-notebook`-Image für ein Scipy-Notebook (Scientific Python) ein.
+    - Port `8888` ist für den Zugriff auf die Jupyter Notebook-Weboberfläche vom Host aus freigegeben.
+    - Ein Volume ermöglicht die persistente Speicherung der Jupyter Notebooks.
+
+### Netzwerke
+
+- **internal_network**:
+    - Ein internes Netzwerk, das die Kommunikation zwischen den Diensten ohne externen Zugang ermöglicht.
+
+- **external_network**:
+    - Ein Netzwerk für den Zugriff von außen sowie vom Host-System.
+
+### Volumes
+
+- **samba_volume**:
+    - Stellt die Persistenz für den Samba-Dateiserver sicher.
+
+- **tomcat_volume**:
+    - Hält die Webanwendungen von Tomcat persistent vor.
+
+- **jupyter_volume**:
+    - Sichert die Scipy Notebooks des Jupyter-Notebook-Servers dauerhaft.
+
+### Zusammenfassung
+
+Diese Konfiguration ermöglicht es, auf einem Raspberry Pi verschiedene Netzwerkdienste einzurichten und zu verwalten. Die klar definierten Dienste, Netzwerke und Volumes unterstützen die einfache und effiziente Entwicklung sowie das Hosting von Anwendungen und Diensten.
+
+
+## Nutzung der Dienste
+
+### Samba-Server
+
+- **Verbindungsaufbau über SMB zum Host:**
+    - Verwenden Sie die angepassten Ports `1390` und `4450`.
+    - Beispiel: \\<Raspberry-Pi-Adresse>:4450 oder smb://<Raspberry-Pi-Adresse>:4450
+- **Zugriff auf die Freigabe:**
+    - Die Freigabe `dateiablage` ist nur mit dem Benutzernamen `patrik.burkhalter` und dem dazugehörigen Passwort zugänglich.
+
+### Tomcat-Webserver
+
+- **Zugriff auf Tomcat:**
+    - Öffnen Sie Ihren Webbrowser und navigieren Sie zu `http://<Raspberry-Pi-Adresse>:8080`.
+- **Startseite:**
+    - Die `index.html`-Datei im Verzeichnis `./tomcat/` dient als Startseite des Tomcat-Servers.
+
+### Jupyter Notebook-Server
+
+- **Zugang zu Jupyter Notebook:**
+    - Öffnen Sie `http://<Raspberry-Pi-Adresse>:8888` in Ihrem Webbrowser.
+- **Persistenz der Notebooks:**
+    - Ihre Jupyter Notebooks werden im `jupyter_volume` gespeichert und sind dort persistent hinterlegt.

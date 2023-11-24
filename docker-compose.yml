@@ -31,27 +31,15 @@ services:
       - internal_network
       - default
 
-  cs2:
-    image: joedwards32/cs2
+  jupyter:
+    image: quay.io/jupyter/scipy-notebook:2023-11-17
     ports:
-      - "27015:27015"
-      - "27016:27016"
-      - "27020:27020"
+      - "8888:8888"
     networks:
       - internal_network
       - default
     volumes:
-      - cs2_volume:/home/steam/cs2-dedicated/
-    environment:
-      - CS2_SERVERNAME="Test Server TEKO" # Set the visible name for your private server
-      - CS2_IP="0.0.0.0"                  # CS2 server listening IP address, 0.0.0.0 - all IP addresses on the local machine, empty - IP identified automatically
-      - CS2_PORT=27015                    # CS2 server listen port tcp_udp
-      - CS2_LAN="1"                       # 0 - LAN mode disabled, 1 - LAN Mode enabled
-      - CS2_RCONPW="test"                 # RCON password
-      - CS2_PW="test"                     # CS2 server password
-      - CS2_MAXPLAYERS=10                 # Max players
-      - CS2_MAPGROUP="mg_active"          # Map pool
-      - CS2_STARTMAP="de_inferno"         # Start map
+      - jupyter_volume:/home/jovyan/work
 
 networks:
   internal_network:
@@ -65,5 +53,5 @@ volumes:
     driver: local
   tomcat_volume:
     driver: local
-  cs2_volume:
+  jupyter_volume:
     driver: local

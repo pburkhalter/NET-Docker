@@ -41,12 +41,11 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 
 ### Docker Compose Konfiguration
 
-Die docker-compose.yml-Datei definiert drei Dienste: samba, tomcat und ntp.
+Die docker-compose.yml-Datei definiert drei Dienste: samba, tomcat und jupyter.
 
 - Samba: Stellt einen Dateiserver zur Verfügung und ermöglicht den Dateiaustausch zwischen Containern und dem Host-System.
 - Tomcat: Ein Webserver, der Java-Webanwendungen hostet.
-- NTP: Synchronisiert die Systemzeit mit NTP-Servern.
-Verwaltung mit Docker Compose
+- Jupyter Notebook: Eine Client-Server-Anwendung für das Erstellen und Teilen interaktiver Arbeitsblätter
 
 Um die definierten Dienste zu starten, verwende:
 
@@ -75,12 +74,13 @@ Verwendet das neueste Tomcat-Image von Docker Hub.
 Der Port 8080 ist für den Zugriff auf Tomcat vom Host aus freigegeben.
 Ein Volume speichert die Webanwendungen persistent.
 Eine lokale index.html-Datei wird in den webapps/ROOT-Ordner gemappt, um eine Homepage bereitzustellen.
-- ntp:
-Verwendet das cturra/ntp-Image.
-Stellt sicher, dass die Zeit im Netzwerk synchronisiert bleibt.
-Benötigt keine externen Ports und kommuniziert nur intern.
-- - networks: Konfiguriert ein internes Netzwerk für die Kommunikation zwischen den Diensten und ein Standardnetzwerk für den Zugriff von aussen.
-volumes: Definiert die Volumes für Samba und Tomcat zur Datenspeicherung.
+- jupyter:
+Verwendet das Scipy-Notebook-Image (Scientific Python).
+Der Port 8888 ist für den Zugriff auf die Weboberfläche von Jupyter Notebook vom Host aus freigegeben.
+Ein Volume speichert die Scipy Notebooks persistent.
+
+- networks: Konfiguriert ein internes Netzwerk für die Kommunikation zwischen den Diensten und ein Standardnetzwerk für den Zugriff von aussen.
+- volumes: Definiert die Volumes für Samba und Tomcat zur Datenspeicherung.
 Zusammenfassung
 
 Mit dieser Konfiguration kann eine praktische Umgebung eingerichtet werden, um Dienste wie Samba und Tomcat zu verstehen und zu verwalten.

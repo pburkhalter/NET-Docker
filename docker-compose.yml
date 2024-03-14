@@ -1,59 +1,63 @@
-version: '3.7'  # Specifies the Docker Compose file format version
+version: '3.7'  # Docker Compose file format version
 
 services:
   samba:
-    image: dperson/samba  # Defines the Docker image to use for the Samba service
-    command: ["-u", "patrik.burkhalter;passwort",  # Command to create a user 'patrik.burkhalter' with password 'passwort'
-              "-s", "dateiablage;/mount/dateiablage;yes;no;no;patrik.burkhalter;"]  # Sets up a Samba share:
-      # - "dateiablage" is the name of the share
-      # - "/mount/dateiablage" is the directory path in the container
-      # - "yes" the share is writable
-      # - "no" guest access is not allowed
-      # - "no" the share is not read-only
-      # - "patrik.burkhalter" restricts access to this user
-    volumes:
-      - samba_volume:/mount/dateiablage  # Maps the 'samba_volume' volume to '/mount/dateiablage' in the container
+    container_name: samba
+    hostname: samba
+    build: ./samba/  # Builds an image from the Dockerfile
     ports:
-      - "1390:139"  # Maps port 1390 on the host to port 139 in the container
-      - "4450:445"  # Maps port 4450 on the host to port 445 in the container
+      - "1390:139"
+      - "4450:445"
+    volumes:
+      - samba_volume:/mount/shares
     environment:
-      - TZ=Europe/Zurich  # Sets the timezone of the container to Zurich
+      - TZ=Europe/Zurich
+      - SAMBA_USERS=${SAMBA_USERS}
+      - CREATE_USER_SHARES=true
+      - BASE_DIR=/mount/shares
     networks:
-      - internal_network  # Connects the Samba service to the internal network
-      - external_network  # Connects the Samba service to the external network
+      - internal_network
+      - external_network
+    restart: always
 
   tomcat:
-    image: tomcat:latest  # Uses the latest official Tomcat Docker image
+    container_name: tomcat
+    hostname: tomcat
+    image: tomcat:latest
     ports:
-      - "8080:8080"  # Maps port 8080 on the host to port 8080 in the container
+      - "8080:8080"
     volumes:
-      - tomcat_volume:/usr/local/tomcat/webapps  # Maps 'tomcat_volume' for persistent storage of webapps
-      - ./tomcat/index.html:/usr/local/tomcat/webapps/ROOT/index.html  # Overrides the default index.html
+      - tomcat_volume:/usr/local/tomcat/webapps
+      - ./tomcat/index.html:/usr/local/tomcat/webapps/ROOT/index.html  # Custom landing page
     networks:
-      - internal_network  # Connects the Tomcat service to the internal network
-      - external_network  # Also connects the Tomcat service to the external network
+      - internal_network
+      - external_network
+    restart: always
 
   jupyter:
-    image: quay.io/jupyter/scipy-notebook:2023-11-17  # Specifies the Jupyter notebook image with a SciPy environment
+    container_name: jupyter
+    hostname: jupyter
+    image: quay.io/jupyter/scipy-notebook
     ports:
-      - "8888:8888"  # Maps port 8888 on the host to port 8888 in the container for Jupyter notebook access
+      - "8888:8888"
     networks:
-      - internal_network  # Connects the Jupyter service to the internal network
-      - external_network  # Connects the Jupyter service to the external network
+      - internal_network
+      - external_network
     volumes:
-      - jupyter_volume:/home/jovyan/work  # Maps 'jupyter_volume' for persistent storage of notebooks
+      - jupyter_volume:/home/jovyan/work
+    restart: always
 
 networks:
   internal_network:
-    driver: bridge  # Specifies a bridge driver for the internal network
-    internal: true  # Makes this network internal only
+    driver: bridge
+    internal: true  # Internal network, not exposed externally
   external_network:
-    driver: bridge  # Specifies a bridge driver for the external network
+    driver: bridge  # External network, for accessing services from outside
 
 volumes:
   samba_volume:
-    driver: local  # Specifies a local volume for Samba
+    driver: local  # Stores Samba shares data
   tomcat_volume:
-    driver: local  # Specifies a local volume for Tomcat
+    driver: local  # Stores Tomcat stuff
   jupyter_volume:
-    driver: local  # Specifies a local volume for Jupyter notebooks
+    driver: local  # Stores Jupyter notebooks

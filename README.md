@@ -1,7 +1,6 @@
 # Docker (Compose) on Raspberry Pi Documentation
 
-This documentation guides you through setting up and using Docker (Compose) on a Raspberry Pi for deploying a Samba file server, a Tomcat web server, and a Jupyter Notebook server.
-
+This documentation provides an insight into the setup and use of Docker (Compose) on a Raspberry Pi for the implementation of a Samba file server, a Tomcat web server, and a Jupyter Notebook. The project was developed as part of the course "Network and Operating Systems" at TEKO to convey practical experience in handling container applications on a Raspberry Pi.
 ## Services Utilization
 
 ### Samba Server
